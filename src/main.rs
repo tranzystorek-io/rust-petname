@@ -109,10 +109,7 @@ fn app<'a, 'b>() -> clap::App<'a, 'b> {
                 .long("count")
                 .value_name("COUNT")
                 .default_value("1")
-                .help(concat!(
-                    "Generate multiple names; pass 0 to produce infinite ",
-                    "names (--count=0 is deprecated; use --stream instead)"
-                ))
+                .help("Generate multiple names; or use --stream to generate continuously")
                 .takes_value(true)
                 .validator(can_be_parsed::<usize>),
         )
@@ -260,21 +257,8 @@ fn run(matches: clap::ArgMatches) -> Result<(), Error> {
     let stdout = io::stdout();
     let mut writer = io::BufWriter::new(stdout.lock());
 
-    // Warn that --count=0 is deprecated.
-    if opt_count == 0 {
-        eprintln!(concat!(
-            "Warning: specifying --count=0 to continuously produce petnames is ",
-            "deprecated and its behaviour will change in a future version; ",
-            "specify --stream instead.",
-        ));
-    }
-
     // Stream if count is 0. TODO: Only stream when --stream is specified.
-    let count = if opt_stream || opt_count == 0 {
-        None
-    } else {
-        Some(opt_count)
-    };
+    let count = if opt_stream { None } else { Some(opt_count) };
 
     // Get an iterator for the names we want to print out.
     if opt_non_repeating {
